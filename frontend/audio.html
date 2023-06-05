@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./dist/output.css" />
+  </head>
+  <body class="bg-slate-800">
+    <div class="flex flex-col h-screen max-h-screen min-h-screen">
+      <div class="flex grow">
+        <div class="flex flex-col grow bg-slate-900 max-h-full justify-center">
+          <div class="flex flex-col justify-center items-center">
+            <audio controls id="audio" class="mb-4">
+              <source id="audioSource" src="" />
+            </audio>
+            <p>Size : <span id="compressed-size"></span></p>
+          </div>
+        </div>
+        <div class="w-72 flex flex-col shrink-0">
+          <a
+            href="./index.html"
+            class="px-4 py-3 text-center bg-yellow-500 w-full"
+          >
+            to Image Processing
+          </a>
+          <label for="audioFile" class="w-full" id="uploadButton"
+            ><div class="px-4 py-3 text-center bg-teal-700" role="button">
+              Upload
+            </div></label
+          >
+          <button
+            class="px-4 py-3 text-center bg-red-700 w-full hidden"
+            id="resetButton"
+          >
+            Reset
+          </button>
+          <input type="file" id="audioFile" accept="audio/*" class="hidden" />
+          <div id="img-control" class="mt-2">
+            <div id="original-audio-section" class="hidden">
+              <div class="flex flex-col">
+                <h6>Original Audio</h6>
+                <p>Name: <span id="file-name"></span></p>
+                <p>Size: <span id="original-size"></span></p>
+                <button
+                  class="px-4 py-3 text-center bg-yellow-500 w-full mt-4"
+                  id="compressButton"
+                >
+                  Compress
+                </button>
+                <label for="gema" class="text-center font-bold my-2 block"
+                  >Efek Gema</label
+                >
+                <div
+                  class="aspect-square flex flex-col justify-center items-center"
+                >
+                  <input
+                    type="range"
+                    class="w-full block bg-gray-200 rounded-lg appearance-none cursor-pointer -rotate-90"
+                    id="gema"
+                    min="0"
+                    step="0.1"
+                    max="1"
+                    value="0"
+                  />
+                </div>
+              </div>
+            </div>
+            <!--  -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="audio.js"></script>
+    <script>
+      const audioElement = document.getElementById("audio");
+      const gema = document.getElementById("gema");
+
+      const feedbackRange = document.getElementById("feedbackRange");
+      let delayNode, feedbackNode;
+
+      gema.addEventListener("input", function () {
+        const feedback = parseFloat(this.value);
+        updateFeedback(feedback);
+      });
+
+      function updateFeedback(feedback) {
+        // Mengubah nilai feedback pada GainNode
+        feedbackNode.gain.value = feedback;
+      }
+
+      audioElement.addEventListener("play", function () {
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaElementSource(audioElement);
+
+        // Buat node efek delay
+        delayNode = audioContext.createDelay();
+        feedbackNode = audioContext.createGain();
+
+        // Atur nilai delay awal
+        const initialDelayTime = 0.3;
+        delayNode.delayTime.value = initialDelayTime;
+
+        // Sambungkan node-node audio
+        source.connect(delayNode);
+        delayNode.connect(feedbackNode);
+        feedbackNode.connect(delayNode);
+        delayNode.connect(audioContext.destination);
+
+        // Putar audio
+        audioElement.play();
+      });
+    </script>
+  </body>
+</html>
